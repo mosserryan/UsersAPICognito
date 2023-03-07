@@ -8,17 +8,33 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.appsdeveloperblog.aws.lambda.service.CognitoUserService;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 /**
  * Handler for requests to Lambda function.
  */
 public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+    private final CognitoUserService cognitoUserService;
+    private final String appClientId;
+    private final String appClientSecret;
+
+    public CreateUserHandler() {
+        this.cognitoUserService = new CognitoUserService(System.getenv("AWS_REGION"));
+        this.appClientId = System.getenv("MY_COGNITO_POOL_APP_CLIENT_ID");
+        this.appClientSecret = System.getenv("MY_COGNITO_POOL_APP_CLIENT_SECRET");
+        }
+
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent input, final Context context) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
+
+        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
+                .withHeaders(headers);
 
         String requestBody = input.getBody();
         LambdaLogger logger = context.getLogger();
@@ -26,12 +42,17 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
 
         JsonObject userDetails = JsonParser.parseString(requestBody).getAsJsonObject();
 
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
-                .withHeaders(headers);
+        try {
+            JsonObject createUserResult = cognitoUserService.createUser(userDetails, appClientId, appClientSecret);
+            response.withStatusCode(200);
+            response.withBody(new Gson().toJson(createUserResult, JsonObject.class));
+        } catch (AwsServiceException exception) {
+            logger.log(exception.awsErrorDetails().errorMessage());
+            response.withStatusCode(500);
+            response.withBody(exception.awsErrorDetails().errorMessage());
+        }
 
-        return response
-                .withStatusCode(200)
-                .withBody("{}");
+        return response;
 
     }
 
