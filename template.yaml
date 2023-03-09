@@ -9,25 +9,36 @@ Description: >
 Globals:
   Function:
     Timeout: 20
-
+    Runtime: java11
+    Architectures:
+        - x86_64
+    MemorySize: 512
+    Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+      Variables:
+        MY_COGNITO_POOL_APP_CLIENT_ID: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wE226M9MBDiW2x/CqG9czrDAAAAeTB3BgkqhkiG9w0BBwagajBoAgEAMGMGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM1U9zKFzOARJUg9K1AgEQgDYYUyCorcve+vO0yRJsHBfRCVIrZwJpe58FAjhGiQBakLEaxUMnLexOC2CzyExI60DADpkCJfQ=
+        MY_COGNITO_POOL_APP_CLIENT_SECRET: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wG04IOwXmz3V4fLY4gG3nG2AAAAljCBkwYJKoZIhvcNAQcGoIGFMIGCAgEAMH0GCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJybh+njYiQ0OoiREAgEQgFCe5DqWrhvBisQUbIlM/uBo/AsyLoDmtlFZnr/1nwdrHpJsv9gQv+prpqTNOGTdDBWe9L0nQIQXBxgan95t7T9wZcNwi+EtKMGacFLVRyNFZA==
 Resources:
   CreateUserHandlerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: PhotoAppUsersAPICognito
       Handler: com.appsdeveloperblog.aws.lambda.CreateUserHandler::handleRequest
-      Runtime: java11
-      Architectures:
-        - x86_64
-      MemorySize: 512
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
-        Variables:
-          PARAM1: VALUE
       Events:
         CreateUser:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /users
+            Method: post
+  ConfirmUserHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: PhotoAppUsersAPICognito
+      Handler: com.appsdeveloperblog.aws.lambda.ConfirmUserHandler::handleRequest
+      Events:
+        ConfirmUser:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /confirm
             Method: post
 
 Outputs:

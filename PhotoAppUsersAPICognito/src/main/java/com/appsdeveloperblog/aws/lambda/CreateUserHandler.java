@@ -25,28 +25,38 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
 
     public CreateUserHandler() {
         this.cognitoUserService = new CognitoUserService(System.getenv("AWS_REGION"));
-        this.appClientId = System.getenv("MY_COGNITO_POOL_APP_CLIENT_ID");
-        this.appClientSecret = System.getenv("MY_COGNITO_POOL_APP_CLIENT_SECRET");
+        this.appClientId = Utils.decryptKey("MY_COGNITO_POOL_APP_CLIENT_ID");
+        this.appClientSecret = Utils.decryptKey("MY_COGNITO_POOL_APP_CLIENT_SECRET");
         }
 
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent input, final Context context) {
         Map<String, String> headers = new HashMap<>();
+        LambdaLogger logger = context.getLogger();
         headers.put("Content-Type", "application/json");
+        logger.log("#1 HEADERS SET");
 
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
 
+        logger.log("#2 INPUT: " + input.toString());
+
         String requestBody = input.getBody();
-        LambdaLogger logger = context.getLogger();
-        logger.log("Original json body: " + requestBody);
 
-        JsonObject userDetails = JsonParser.parseString(requestBody).getAsJsonObject();
+        logger.log("#3 ORIGINAL JSON BODY: " + requestBody);
 
+        JsonObject userDetails = null;
         try {
+            logger.log("#4 PARSING JSON BODY USER");
+            userDetails = JsonParser.parseString(requestBody).getAsJsonObject();
+            logger.log("#5 CREATING USER");
+            logger.log("APP_CLIENT_ID: " + appClientId);
+            logger.log("APP_CLIENT_SECRET: " + appClientSecret);
             JsonObject createUserResult = cognitoUserService.createUser(userDetails, appClientId, appClientSecret);
             response.withStatusCode(200);
             response.withBody(new Gson().toJson(createUserResult, JsonObject.class));
+            logger.log("#6 USER CREATED");
         } catch (AwsServiceException exception) {
+            logger.log("#6 FAILED CREATING USER");
             logger.log(exception.awsErrorDetails().errorMessage());
             response.withStatusCode(500);
             response.withBody(exception.awsErrorDetails().errorMessage());
