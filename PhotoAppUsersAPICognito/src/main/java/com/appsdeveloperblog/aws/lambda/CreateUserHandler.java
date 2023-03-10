@@ -58,8 +58,14 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
         } catch (AwsServiceException exception) {
             logger.log("#6 FAILED CREATING USER");
             logger.log(exception.awsErrorDetails().errorMessage());
+            ErrorResponse errorResponse = new ErrorResponse(exception.awsErrorDetails().errorMessage());
+            response.withBody(new Gson().toJson(errorResponse, ErrorResponse.class));
+            response.withStatusCode(exception.awsErrorDetails().sdkHttpResponse().statusCode());
+        } catch (Exception exception) {
+            logger.log(exception.getMessage());
+            ErrorResponse errorResponse = new ErrorResponse(exception.getMessage());
+            response.withBody(new Gson().toJson(errorResponse, ErrorResponse.class));
             response.withStatusCode(500);
-            response.withBody(exception.awsErrorDetails().errorMessage());
         }
 
         return response;
