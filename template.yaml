@@ -17,6 +17,7 @@ Globals:
       Variables:
         MY_COGNITO_POOL_APP_CLIENT_ID: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wE226M9MBDiW2x/CqG9czrDAAAAeTB3BgkqhkiG9w0BBwagajBoAgEAMGMGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM1U9zKFzOARJUg9K1AgEQgDYYUyCorcve+vO0yRJsHBfRCVIrZwJpe58FAjhGiQBakLEaxUMnLexOC2CzyExI60DADpkCJfQ=
         MY_COGNITO_POOL_APP_CLIENT_SECRET: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wG04IOwXmz3V4fLY4gG3nG2AAAAljCBkwYJKoZIhvcNAQcGoIGFMIGCAgEAMH0GCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJybh+njYiQ0OoiREAgEQgFCe5DqWrhvBisQUbIlM/uBo/AsyLoDmtlFZnr/1nwdrHpJsv9gQv+prpqTNOGTdDBWe9L0nQIQXBxgan95t7T9wZcNwi+EtKMGacFLVRyNFZA==
+        MY_COGNITO_POOL_ID: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wGKH9XupA8lEDw4N5jC9SOJAAAAcjBwBgkqhkiG9w0BBwagYzBhAgEAMFwGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMZF9hUMTy6CwSnTDAAgEQgC9mxiRE+zhGWfSAUk2q4lrRDHoIyBqYXguPQjX25XjgzULzCSmL3alINSe+zTA2Zg==
 Resources:
   CreateUserHandlerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -50,6 +51,24 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /login
+            Method: post
+  AddUserToGroupHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: PhotoAppUsersAPICognito
+      Handler: com.appsdeveloperblog.aws.lambda.AddUserToGroupHandler::handleRequest
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'cognito-idp:AdminAddUserToGroup'
+              Resource: "arn:aws:cognito-idp:us-west-2:796162985282:userpool/us-west-2_9KaPB3BsU"
+      Events:
+        AddUserToGroup:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /users/{username}/add-to-group
             Method: post
 
 Outputs:
