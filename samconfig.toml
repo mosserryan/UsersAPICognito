@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "photo-app-users-api-cognito-stack"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-5tgrg39tlnht"
+s3_prefix = "photo-app-users-api-cognito-stack"
+region = "us-west-2"
+capabilities = "CAPABILITY_IAM"
+disable_rollback = false
+image_repositories = []

@@ -15,10 +15,19 @@ Globals:
     MemorySize: 512
     Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
       Variables:
-        MY_COGNITO_POOL_APP_CLIENT_ID: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wE226M9MBDiW2x/CqG9czrDAAAAeTB3BgkqhkiG9w0BBwagajBoAgEAMGMGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM1U9zKFzOARJUg9K1AgEQgDYYUyCorcve+vO0yRJsHBfRCVIrZwJpe58FAjhGiQBakLEaxUMnLexOC2CzyExI60DADpkCJfQ=
-        MY_COGNITO_POOL_APP_CLIENT_SECRET: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wG04IOwXmz3V4fLY4gG3nG2AAAAljCBkwYJKoZIhvcNAQcGoIGFMIGCAgEAMH0GCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJybh+njYiQ0OoiREAgEQgFCe5DqWrhvBisQUbIlM/uBo/AsyLoDmtlFZnr/1nwdrHpJsv9gQv+prpqTNOGTdDBWe9L0nQIQXBxgan95t7T9wZcNwi+EtKMGacFLVRyNFZA==
-        MY_COGNITO_POOL_ID: AQICAHgnTI7WalQnJoRWKOtvmirVX2Pk8JjTWURHXhyh8F2A7wGKH9XupA8lEDw4N5jC9SOJAAAAcjBwBgkqhkiG9w0BBwagYzBhAgEAMFwGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMZF9hUMTy6CwSnTDAAgEQgC9mxiRE+zhGWfSAUk2q4lrRDHoIyBqYXguPQjX25XjgzULzCSmL3alINSe+zTA2Zg==
+        MY_COGNITO_POOL_APP_CLIENT_ID: AQICAHimVCAslFGs4s+yA3Gl3GfngLiHIPwrStF7BaqZp+03ZQH1gQD3AnRTm8tBpYGtvMjxAAAAeDB2BgkqhkiG9w0BBwagaTBnAgEAMGIGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMy+kCJggRpxPaV1yKAgEQgDVnGHUrbhPKwWQ/cCUL7iRJs/R3BvPkpNX3aMY4NRm2mGkqkwLIwk76oY9lJutTWZHqMjLE1Q==
+        MY_COGNITO_POOL_APP_CLIENT_SECRET: AQICAHimVCAslFGs4s+yA3Gl3GfngLiHIPwrStF7BaqZp+03ZQGyjzGIQK4+FSQXDjDnlGGeAAAAlTCBkgYJKoZIhvcNAQcGoIGEMIGBAgEAMHwGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM44fRbIHT1dNtjqm0AgEQgE9TzCYMg/AEB+dgoIiTrtFHYz4YYe4CvhdDBwP1fjaEWPq7pOm8cpZJ1bZ86F3OHDiF+0lc9yCFNrhKWfzCMO9UeN2vSlKo3x5h+iaQx7RK
+        MY_COGNITO_POOL_ID: AQICAHimVCAslFGs4s+yA3Gl3GfngLiHIPwrStF7BaqZp+03ZQFVLi0fXnkNWLZw2BHDXezyAAAAcjBwBgkqhkiG9w0BBwagYzBhAgEAMFwGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMpKM4VSYrtRQWUqOxAgEQgC/M26S2CYd/gu5oHppZGKRYJSNf7FNHvaTnPZkIdVw/cCeLfqrvIMC2YoUA7gIagQ==
 Resources:
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: open-api.yaml
   CreateUserHandlerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -30,6 +39,8 @@ Resources:
           Properties:
             Path: /users
             Method: post
+            RestApiId:
+              Ref: MyApi
   ConfirmUserHandlerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -41,6 +52,8 @@ Resources:
           Properties:
             Path: /confirm
             Method: post
+            RestApiId:
+              Ref: MyApi
   LoginUserHandlerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -52,6 +65,8 @@ Resources:
           Properties:
             Path: /login
             Method: post
+            RestApiId:
+              Ref: MyApi
   AddUserToGroupHandlerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -70,6 +85,21 @@ Resources:
           Properties:
             Path: /users/{username}/add-to-group
             Method: post
+            RestApiId:
+              Ref: MyApi
+  GetUserHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: PhotoAppUsersAPICognito
+      Handler: com.appsdeveloperblog.aws.lambda.GetUserHandler::handleRequest
+      Events:
+        GetUser:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /users/me
+            Method: get
+            RestApiId:
+              Ref: MyApi
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -77,7 +107,7 @@ Outputs:
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   CreateUserApi:
     Description: "API Gateway endpoint URL for Prod stage for CreateUserHandler Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
   CreateUserHandlerFunction:
     Description: "CreateUserHandler Lambda Function ARN"
     Value: !GetAtt CreateUserHandlerFunction.Arn
